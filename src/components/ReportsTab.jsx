@@ -10,7 +10,7 @@ function isToday(isoString) {
   return d.toDateString() === now.toDateString()
 }
 
-export default function ReportsTab({ role, onLogout }) {
+export default function ReportsTab({ role }) {
   const { t } = useLanguage()
 
   const { totalUsd, saleCount, itemCount, topItems } = useMemo(() => {
@@ -30,7 +30,7 @@ export default function ReportsTab({ role, onLogout }) {
 
   return (
     <div className="px-4 pt-4 pb-10">
-      <ManageHeader title={t('reportsTitle')} subtitle={t('reportsSubtitle')} role={role} onLogout={onLogout} />
+      <ManageHeader title={t('reportsTitle')} subtitle={t('reportsSubtitle')} role={role} />
 
       <div className="grid grid-cols-2 gap-3 mb-6">
         <StatCard label={t('totalRevenue')} value={formatUsd(totalUsd)} sub={formatKhr(totalUsd)} />

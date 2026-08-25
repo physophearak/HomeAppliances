@@ -2,12 +2,12 @@ import { useLanguage } from '../i18n/LanguageContext'
 import { formatUsd } from '../lib/currency'
 import ManageHeader from './ManageHeader'
 
-export default function StockTab({ products, onUpdateStock, loading, role, onLogout }) {
+export default function StockTab({ products, onUpdateStock, loading, role }) {
   const { lang, t } = useLanguage()
 
   return (
     <div className="px-4 pt-4 pb-10">
-      <ManageHeader title={t('stockTitle')} subtitle={t('stockSubtitle')} role={role} onLogout={onLogout} />
+      <ManageHeader title={t('stockTitle')} subtitle={t('stockSubtitle')} role={role} />
 
       {loading ? (
         <ul className="flex flex-col gap-3">

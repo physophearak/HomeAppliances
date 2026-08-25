@@ -10,7 +10,7 @@ function emptyForm() {
   return { nameEn: '', nameKm: '', category: 'kitchen', priceUsd: '', stock: '', imageUrl: '', sku: '' }
 }
 
-export default function ProductsTab({ products, onAddProduct, loading, role, onLogout }) {
+export default function ProductsTab({ products, onAddProduct, loading, role }) {
   const { lang, t } = useLanguage()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(emptyForm())
@@ -41,7 +41,7 @@ export default function ProductsTab({ products, onAddProduct, loading, role, onL
 
   return (
     <div className="px-4 pt-4 pb-10">
-      <ManageHeader title={t('productsTitle')} subtitle={t('productsSubtitle')} role={role} onLogout={onLogout} />
+      <ManageHeader title={t('productsTitle')} subtitle={t('productsSubtitle')} role={role} />
 
       {canAddProduct ? (
         <button

@@ -10,13 +10,20 @@ export default function SettingsTab({ role, onLogout }) {
 
   return (
     <div className="px-4 pt-4 pb-10">
-      <ManageHeader title={t('settingsTitle')} subtitle={t('settingsSubtitle')} role={role} onLogout={onLogout} />
+      <ManageHeader title={t('settingsTitle')} subtitle={t('settingsSubtitle')} role={role} />
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 mb-6">
         <Row label={t('connectionStatus')} value={isConnected ? t('connected') : t('notConnected')} />
         <Row label={t('exchangeRate')} value={`1 USD = ${KHR_RATE.toLocaleString('en-US')}៛`} />
         {isConnected && <Row label={t('sheetUrl')} value={GAS_URL} wrap />}
       </div>
+
+      <button
+        onClick={onLogout}
+        className="w-full py-4 rounded-2xl bg-red-50 text-red-600 text-xl font-extrabold active:scale-95 transition"
+      >
+        {t('logout')}
+      </button>
     </div>
   )
 }

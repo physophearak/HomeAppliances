@@ -113,7 +113,6 @@ function AppInner() {
   const handleLogout = () => {
     logoutRole()
     setRole(null)
-    setTab('pos')
   }
 
   const hasCartItems = cart.length > 0
@@ -154,7 +153,6 @@ function AppInner() {
             onUpdateStock={handleUpdateStock}
             loading={loading}
             role={role}
-            onLogout={handleLogout}
           />
         ) : tab === 'products' ? (
           <ProductsTab
@@ -162,10 +160,9 @@ function AppInner() {
             onAddProduct={handleAddProduct}
             loading={loading}
             role={role}
-            onLogout={handleLogout}
           />
         ) : tab === 'reports' ? (
-          <ReportsTab role={role} onLogout={handleLogout} />
+          <ReportsTab role={role} />
         ) : (
           <SettingsTab role={role} onLogout={handleLogout} />
         )}
