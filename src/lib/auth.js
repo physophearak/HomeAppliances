@@ -11,11 +11,10 @@ export function getStoredRole() {
   return role === 'owner' || role === 'staff' ? role : null
 }
 
-export function loginWithPin(pin) {
-  const match = Object.entries(PINS).find(([, rolePin]) => rolePin === pin)
-  const role = match ? match[0] : null
-  if (role) localStorage.setItem(ROLE_KEY, role)
-  return role
+export function loginAsRole(role, pin) {
+  if (!PINS[role] || PINS[role] !== pin) return false
+  localStorage.setItem(ROLE_KEY, role)
+  return true
 }
 
 export function logout() {
