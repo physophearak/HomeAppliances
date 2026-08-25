@@ -73,7 +73,10 @@ export default function CartDrawer({ open, onClose, cart, onInc, onDec, onRemove
         </div>
 
         {cart.length > 0 && (
-          <div className="border-t-2 border-gray-100 p-5 flex flex-col gap-3">
+          <div
+            className="border-t-2 border-gray-100 p-5 flex flex-col gap-3"
+            style={{ paddingBottom: 'max(1.25rem, calc(1.25rem + env(safe-area-inset-bottom)))' }}
+          >
             <div className="flex items-center justify-between">
               <button onClick={onClear} className="text-lg font-bold text-red-600 underline">
                 {t('clearCart')}

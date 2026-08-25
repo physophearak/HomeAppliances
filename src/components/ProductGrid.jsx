@@ -42,7 +42,17 @@ export default function ProductGrid({ products, cart, onAdd, loading, category, 
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-xl font-bold text-gray-400">{t('loading')}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="rounded-3xl border-4 border-gray-100 overflow-hidden bg-white">
+              <div className="w-full aspect-square bg-gray-100 animate-pulse" />
+              <div className="p-3 flex flex-col gap-2">
+                <div className="h-4 w-3/4 rounded bg-gray-100 animate-pulse" />
+                <div className="h-5 w-1/2 rounded bg-gray-100 animate-pulse" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center text-xl font-bold text-gray-400">{t('noProducts')}</div>
       ) : (

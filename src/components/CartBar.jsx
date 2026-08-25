@@ -8,7 +8,10 @@ export default function CartBar({ cart, total, onOpenCart, onCheckout, checking 
   if (count === 0) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-4 border-gray-200 shadow-[0_-6px_20px_rgba(0,0,0,0.08)] animate-slide-up">
+    <div
+      className="fixed left-0 right-0 z-40 bg-white border-t-4 border-gray-200 shadow-[0_-6px_20px_rgba(0,0,0,0.08)] animate-slide-up"
+      style={{ bottom: 'calc(4.75rem + env(safe-area-inset-bottom))' }}
+    >
       <div className="flex items-center gap-3 p-3 max-w-3xl mx-auto">
         <button
           onClick={onOpenCart}

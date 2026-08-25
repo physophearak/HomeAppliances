@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext'
 import { fetchProducts, recordSale, updateStock, addProduct, isConnected } from './lib/api'
+import { getStoredRole, logout as logoutRole } from './lib/auth'
 import Header from './components/Header'
 import ProductGrid from './components/ProductGrid'
 import CartBar from './components/CartBar'
 import CartDrawer from './components/CartDrawer'
 import AdminTab from './components/AdminTab'
+import Login from './components/Login'
 import Toast from './components/Toast'
+import BottomNav from './components/BottomNav'
 
 function AppInner() {
   const { t } = useLanguage()
@@ -19,6 +22,7 @@ function AppInner() {
   const [search, setSearch] = useState('')
   const [checking, setChecking] = useState(false)
   const [toast, setToast] = useState(null)
+  const [role, setRole] = useState(() => getStoredRole())
 
   useEffect(() => {
     let active = true
@@ -101,13 +105,29 @@ function AppInner() {
     })
   }
 
+  const handleLogout = () => {
+    logoutRole()
+    setRole(null)
+    setTab('pos')
+  }
+
+  const hasCartItems = cart.length > 0
+
   return (
-    <div className="min-h-screen pb-28">
-      <Header tab={tab} setTab={setTab} connected={isConnected} />
+    <div className="min-h-[100dvh] flex flex-col">
+      <Header connected={isConnected} />
       <Toast toast={toast} />
 
-      {tab === 'pos' ? (
-        <>
+      <div
+        key={tab}
+        className="flex-1 animate-fade-in"
+        style={{
+          paddingBottom: `calc(5.25rem + env(safe-area-inset-bottom) + ${
+            tab === 'pos' && hasCartItems ? '5rem' : '0px'
+          })`,
+        }}
+      >
+        {tab === 'pos' ? (
           <ProductGrid
             products={products}
             cart={cart}
@@ -118,6 +138,22 @@ function AppInner() {
             search={search}
             setSearch={setSearch}
           />
+        ) : role ? (
+          <AdminTab
+            products={products}
+            onUpdateStock={handleUpdateStock}
+            onAddProduct={handleAddProduct}
+            loading={loading}
+            role={role}
+            onLogout={handleLogout}
+          />
+        ) : (
+          <Login onLogin={setRole} />
+        )}
+      </div>
+
+      {tab === 'pos' && (
+        <>
           <CartBar
             cart={cart}
             total={total}
@@ -138,14 +174,9 @@ function AppInner() {
             checking={checking}
           />
         </>
-      ) : (
-        <AdminTab
-          products={products}
-          onUpdateStock={handleUpdateStock}
-          onAddProduct={handleAddProduct}
-          loading={loading}
-        />
       )}
+
+      <BottomNav tab={tab} setTab={setTab} />
     </div>
   )
 }
