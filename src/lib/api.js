@@ -3,6 +3,7 @@ import { seedProducts } from '../data/seedProducts'
 const ENDPOINT = import.meta.env.VITE_GAS_URL || ''
 const LOCAL_PRODUCTS_KEY = 'jehour_products_cache'
 const LOCAL_PENDING_SALES_KEY = 'jehour_pending_sales'
+const LOCAL_SALES_LOG_KEY = 'jehour_sales_log'
 
 export const isConnected = Boolean(ENDPOINT)
 
@@ -17,6 +18,24 @@ function readLocalProducts() {
 
 function writeLocalProducts(products) {
   localStorage.setItem(LOCAL_PRODUCTS_KEY, JSON.stringify(products))
+}
+
+function logSaleLocally(sale) {
+  try {
+    const log = JSON.parse(localStorage.getItem(LOCAL_SALES_LOG_KEY) || '[]')
+    log.push(sale)
+    localStorage.setItem(LOCAL_SALES_LOG_KEY, JSON.stringify(log))
+  } catch {
+    // Storage full or unavailable — skip logging rather than block the sale.
+  }
+}
+
+export function getSalesLog() {
+  try {
+    return JSON.parse(localStorage.getItem(LOCAL_SALES_LOG_KEY) || '[]')
+  } catch {
+    return []
+  }
 }
 
 function normalizeProduct(row) {
@@ -77,6 +96,7 @@ export async function recordSale({ items, total, timestamp }) {
     return line ? { ...p, stock: Math.max(0, p.stock - line.qty) } : p
   })
   writeLocalProducts(updated)
+  logSaleLocally(sale)
 
   if (!ENDPOINT) {
     return { ok: true, offline: true }

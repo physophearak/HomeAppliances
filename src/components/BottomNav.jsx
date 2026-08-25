@@ -5,7 +5,10 @@ export default function BottomNav({ tab, setTab }) {
 
   const tabs = [
     { id: 'pos', label: t('navPos'), icon: '🛒' },
-    { id: 'admin', label: t('navAdmin'), icon: '📦' },
+    { id: 'stock', label: t('navStock'), icon: '📦' },
+    { id: 'products', label: t('navProducts'), icon: '🏷️' },
+    { id: 'reports', label: t('navReports'), icon: '📊' },
+    { id: 'settings', label: t('navSettings'), icon: '⚙️' },
   ]
 
   return (
@@ -19,22 +22,22 @@ export default function BottomNav({ tab, setTab }) {
           <button
             key={item.id}
             onClick={() => setTab(item.id)}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 relative"
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 relative min-w-0"
           >
             <span
-              className={`text-2xl transition-transform ${active ? 'scale-110' : 'opacity-60'}`}
+              className={`text-xl transition-transform ${active ? 'scale-110' : 'opacity-60'}`}
             >
               {item.icon}
             </span>
             <span
-              className={`text-sm font-bold transition-colors ${
+              className={`text-[11px] font-bold transition-colors truncate max-w-full px-0.5 ${
                 active ? 'text-emerald-700' : 'text-gray-400'
               }`}
             >
               {item.label}
             </span>
             {active && (
-              <span className="absolute top-0 h-1 w-10 rounded-full bg-emerald-600" />
+              <span className="absolute top-0 h-1 w-8 rounded-full bg-emerald-600" />
             )}
           </button>
         )

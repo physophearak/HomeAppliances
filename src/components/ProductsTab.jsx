@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { formatUsd } from '../lib/currency'
 import { can } from '../lib/auth'
+import ManageHeader from './ManageHeader'
 
 const CATEGORY_OPTIONS = ['kitchen', 'appliances', 'cleaning', 'cooling']
 
@@ -9,7 +10,7 @@ function emptyForm() {
   return { nameEn: '', nameKm: '', category: 'kitchen', priceUsd: '', stock: '', imageUrl: '', sku: '' }
 }
 
-export default function AdminTab({ products, onUpdateStock, onAddProduct, loading, role, onLogout }) {
+export default function ProductsTab({ products, onAddProduct, loading, role, onLogout }) {
   const { lang, t } = useLanguage()
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(emptyForm())
@@ -40,35 +41,17 @@ export default function AdminTab({ products, onUpdateStock, onAddProduct, loadin
 
   return (
     <div className="px-4 pt-4 pb-10">
-      <div className="flex items-start justify-between gap-3 mb-1">
-        <div>
-          <h2 className="text-3xl font-extrabold text-gray-900">{t('stockTitle')}</h2>
-          <p className="text-lg text-gray-500">{t('stockSubtitle')}</p>
-        </div>
-        <div className="flex flex-col items-end gap-1 shrink-0 pt-1">
-          <span
-            className={`px-3 py-1 rounded-full text-sm font-extrabold whitespace-nowrap ${
-              role === 'owner' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700'
-            }`}
-          >
-            {role === 'owner' ? t('roleOwner') : t('roleStaff')}
-          </span>
-          <button
-            onClick={onLogout}
-            className="text-sm font-bold text-gray-400 active:text-gray-600 transition"
-          >
-            {t('logout')}
-          </button>
-        </div>
-      </div>
+      <ManageHeader title={t('productsTitle')} subtitle={t('productsSubtitle')} role={role} onLogout={onLogout} />
 
-      {canAddProduct && (
+      {canAddProduct ? (
         <button
           onClick={() => setShowForm((s) => !s)}
-          className="w-full py-4 mb-4 mt-3 rounded-2xl bg-gray-900 text-white text-xl font-extrabold active:scale-95 transition"
+          className="w-full py-4 mb-4 rounded-2xl bg-gray-900 text-white text-xl font-extrabold active:scale-95 transition"
         >
           {showForm ? `✕ ${t('cancel')}` : `+ ${t('addNewItem')}`}
         </button>
+      ) : (
+        <p className="text-base font-semibold text-gray-400 mb-4">{t('productsOwnerOnly')}</p>
       )}
 
       {canAddProduct && showForm && (
@@ -157,7 +140,6 @@ export default function AdminTab({ products, onUpdateStock, onAddProduct, loadin
                 <div className="h-4 w-2/3 rounded bg-gray-100 animate-pulse" />
                 <div className="h-3 w-1/3 rounded bg-gray-100 animate-pulse" />
               </div>
-              <div className="w-24 h-11 rounded-full bg-gray-100 animate-pulse shrink-0" />
             </li>
           ))}
         </ul>
@@ -179,23 +161,13 @@ export default function AdminTab({ products, onUpdateStock, onAddProduct, loadin
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-lg font-bold text-gray-900 truncate">{name}</p>
-                  <p className="text-base font-semibold text-gray-500">{formatUsd(p.priceUsd)}</p>
+                  <p className="text-base font-semibold text-gray-500">
+                    {formatUsd(p.priceUsd)} · {t(`categories.${p.category}`)}
+                  </p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => onUpdateStock(p.id, Math.max(0, p.stock - 1))}
-                    className="w-11 h-11 rounded-full bg-gray-200 text-gray-800 text-2xl font-extrabold flex items-center justify-center active:scale-90 transition"
-                  >
-                    −
-                  </button>
-                  <span className="w-10 text-center text-xl font-extrabold">{p.stock}</span>
-                  <button
-                    onClick={() => onUpdateStock(p.id, p.stock + 1)}
-                    className="w-11 h-11 rounded-full bg-emerald-600 text-white text-2xl font-extrabold flex items-center justify-center active:scale-90 transition"
-                  >
-                    +
-                  </button>
-                </div>
+                <span className="text-base font-extrabold text-gray-400 shrink-0">
+                  {p.stock} {t('unitsShort')}
+                </span>
               </li>
             )
           })}

@@ -6,14 +6,19 @@ import Header from './components/Header'
 import ProductGrid from './components/ProductGrid'
 import CartBar from './components/CartBar'
 import CartDrawer from './components/CartDrawer'
-import AdminTab from './components/AdminTab'
+import StockTab from './components/StockTab'
+import ProductsTab from './components/ProductsTab'
+import ReportsTab from './components/ReportsTab'
+import SettingsTab from './components/SettingsTab'
 import Login from './components/Login'
 import Toast from './components/Toast'
 import BottomNav from './components/BottomNav'
 
+const PROTECTED_TABS = ['stock', 'products', 'reports', 'settings']
+
 function AppInner() {
   const { t } = useLanguage()
-  const [tab, setTab] = useState(() => (getStoredRole() ? 'pos' : 'admin'))
+  const [tab, setTab] = useState(() => (getStoredRole() ? 'pos' : 'stock'))
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState([])
@@ -112,7 +117,7 @@ function AppInner() {
   }
 
   const hasCartItems = cart.length > 0
-  const showingLogin = tab === 'admin' && !role
+  const showingLogin = PROTECTED_TABS.includes(tab) && !role
 
   return (
     <div className="min-h-[100dvh] flex flex-col">
@@ -141,17 +146,28 @@ function AppInner() {
             search={search}
             setSearch={setSearch}
           />
-        ) : role ? (
-          <AdminTab
+        ) : !role ? (
+          <Login onLogin={setRole} onClose={() => setTab('pos')} />
+        ) : tab === 'stock' ? (
+          <StockTab
             products={products}
             onUpdateStock={handleUpdateStock}
+            loading={loading}
+            role={role}
+            onLogout={handleLogout}
+          />
+        ) : tab === 'products' ? (
+          <ProductsTab
+            products={products}
             onAddProduct={handleAddProduct}
             loading={loading}
             role={role}
             onLogout={handleLogout}
           />
+        ) : tab === 'reports' ? (
+          <ReportsTab role={role} onLogout={handleLogout} />
         ) : (
-          <Login onLogin={setRole} onClose={() => setTab('pos')} />
+          <SettingsTab role={role} onLogout={handleLogout} />
         )}
       </div>
 
