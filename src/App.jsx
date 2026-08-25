@@ -13,7 +13,7 @@ import BottomNav from './components/BottomNav'
 
 function AppInner() {
   const { t } = useLanguage()
-  const [tab, setTab] = useState('pos')
+  const [tab, setTab] = useState(() => (getStoredRole() ? 'pos' : 'admin'))
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState([])
