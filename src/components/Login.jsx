@@ -9,7 +9,7 @@ const ROLES = [
   { id: 'staff', icon: '🧑‍💼' },
 ]
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, onClose }) {
   const { t } = useLanguage()
   const [role, setRole] = useState(null)
   const [pin, setPin] = useState('')
@@ -52,7 +52,15 @@ export default function Login({ onLogin }) {
 
   if (!role) {
     return (
-      <div className="px-4 pt-10 pb-10 flex flex-col items-center">
+      <div className="px-4 pt-10 pb-10 flex flex-col items-center relative">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute left-4 top-10 w-11 h-11 rounded-full bg-white border-4 border-gray-200 text-xl flex items-center justify-center active:scale-90 transition"
+        >
+          ✕
+        </button>
+
         <h2 className="text-3xl font-extrabold text-gray-900 text-center">
           {t('loginWhoIsUsing')}
         </h2>

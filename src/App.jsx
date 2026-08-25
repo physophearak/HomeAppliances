@@ -112,6 +112,7 @@ function AppInner() {
   }
 
   const hasCartItems = cart.length > 0
+  const showingLogin = tab === 'admin' && !role
 
   return (
     <div className="min-h-[100dvh] flex flex-col">
@@ -122,9 +123,11 @@ function AppInner() {
         key={tab}
         className="flex-1 animate-fade-in"
         style={{
-          paddingBottom: `calc(5.25rem + env(safe-area-inset-bottom) + ${
-            tab === 'pos' && hasCartItems ? '5rem' : '0px'
-          })`,
+          paddingBottom: showingLogin
+            ? '0px'
+            : `calc(5.25rem + env(safe-area-inset-bottom) + ${
+                tab === 'pos' && hasCartItems ? '5rem' : '0px'
+              })`,
         }}
       >
         {tab === 'pos' ? (
@@ -148,7 +151,7 @@ function AppInner() {
             onLogout={handleLogout}
           />
         ) : (
-          <Login onLogin={setRole} />
+          <Login onLogin={setRole} onClose={() => setTab('pos')} />
         )}
       </div>
 
@@ -176,7 +179,7 @@ function AppInner() {
         </>
       )}
 
-      <BottomNav tab={tab} setTab={setTab} />
+      {!showingLogin && <BottomNav tab={tab} setTab={setTab} />}
     </div>
   )
 }
