@@ -1,15 +1,19 @@
 import { useLanguage } from '../i18n/LanguageContext'
 
-export default function BottomNav({ tab, setTab }) {
+const STAFF_TABS = ['pos', 'stock', 'settings']
+
+export default function BottomNav({ tab, setTab, role }) {
   const { t } = useLanguage()
 
-  const tabs = [
+  const allTabs = [
     { id: 'pos', label: t('navPos'), icon: '🛒' },
     { id: 'stock', label: t('navStock'), icon: '📦' },
     { id: 'products', label: t('navProducts'), icon: '🏷️' },
     { id: 'reports', label: t('navReports'), icon: '📊' },
     { id: 'settings', label: t('navSettings'), icon: '⚙️' },
   ]
+
+  const tabs = role === 'staff' ? allTabs.filter((item) => STAFF_TABS.includes(item.id)) : allTabs
 
   return (
     <nav

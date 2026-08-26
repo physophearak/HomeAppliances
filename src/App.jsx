@@ -232,7 +232,7 @@ function AppInner() {
         </>
       )}
 
-      {!showingLogin && <BottomNav tab={tab} setTab={setTab} />}
+      {!showingLogin && <BottomNav tab={tab} setTab={setTab} role={role} />}
     </div>
   )
 }
