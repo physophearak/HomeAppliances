@@ -41,12 +41,6 @@ export default function Header({ connected }) {
           </button>
         </div>
       </div>
-
-      {!connected && (
-        <div className="bg-amber-100 text-amber-900 text-center text-sm font-semibold py-1.5 px-2">
-          ⚠ {t('offlineMode')}
-        </div>
-      )}
     </header>
   )
 }
