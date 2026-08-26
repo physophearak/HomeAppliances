@@ -77,6 +77,9 @@ function doPost(e) {
   if (action === 'addProduct') {
     return handleAddProduct(body);
   }
+  if (action === 'updateProduct') {
+    return handleUpdateProduct(body);
+  }
   return jsonResponse({ ok: false, error: 'Unknown action' });
 }
 
@@ -125,6 +128,39 @@ function handleAddProduct(body) {
     ok: true,
     product: {
       id,
+      nameEn: body.nameEn,
+      nameKm: body.nameKm,
+      category: body.category,
+      priceUsd: Number(body.priceUsd) || 0,
+      stock: Number(body.stock) || 0,
+      imageUrl: body.imageUrl || '',
+      sku: body.sku || '',
+    },
+  });
+}
+
+function handleUpdateProduct(body) {
+  const productsSheet = getSheet(PRODUCTS_SHEET);
+  const rowIndex = findRowById(productsSheet, body.id);
+  if (rowIndex === -1) return jsonResponse({ ok: false, error: 'Product not found' });
+  productsSheet
+    .getRange(rowIndex, 1, 1, 8)
+    .setValues([
+      [
+        body.id,
+        body.nameEn || '',
+        body.nameKm || '',
+        body.category || 'kitchen',
+        Number(body.priceUsd) || 0,
+        Number(body.stock) || 0,
+        body.imageUrl || '',
+        body.sku || '',
+      ],
+    ]);
+  return jsonResponse({
+    ok: true,
+    product: {
+      id: body.id,
       nameEn: body.nameEn,
       nameKm: body.nameKm,
       category: body.category,

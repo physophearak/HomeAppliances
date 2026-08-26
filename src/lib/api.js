@@ -142,3 +142,18 @@ export async function addProduct(product) {
     return { ok: false, offline: true, product: newProduct }
   }
 }
+
+export async function updateProduct(product) {
+  const products = readLocalProducts()
+  const updated = normalizeProduct(product)
+  writeLocalProducts(products.map((p) => (p.id === updated.id ? updated : p)))
+
+  if (!ENDPOINT) return { ok: true, offline: true, product: updated }
+  try {
+    const res = await postToScript({ action: 'updateProduct', ...updated })
+    return { ok: true, offline: false, product: normalizeProduct(res.product || updated) }
+  } catch (err) {
+    console.warn('Update product failed to sync:', err)
+    return { ok: false, offline: true, product: updated }
+  }
+}

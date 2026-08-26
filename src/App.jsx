@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext'
-import { fetchProducts, recordSale, updateStock, addProduct, isConnected } from './lib/api'
+import { fetchProducts, recordSale, updateStock, addProduct, updateProduct, isConnected } from './lib/api'
 import { getStoredRole, logout as logoutRole } from './lib/auth'
 import { setExchangeRate } from './lib/currency'
 import Header from './components/Header'
@@ -111,6 +111,15 @@ function AppInner() {
     })
   }
 
+  const handleUpdateProduct = async (product) => {
+    const result = await updateProduct(product)
+    setProducts((prev) => prev.map((p) => (p.id === result.product.id ? result.product : p)))
+    setToast({
+      type: result.ok ? 'success' : 'error',
+      message: result.ok ? t('itemUpdated') : t('saleError'),
+    })
+  }
+
   const handleUpdateExchangeRate = (rate) => {
     setExchangeRate(rate)
     setToast({ type: 'success', message: t('exchangeRateUpdated') })
@@ -172,6 +181,7 @@ function AppInner() {
           <ProductsTab
             products={products}
             onAddProduct={handleAddProduct}
+            onUpdateProduct={handleUpdateProduct}
             loading={loading}
             role={role}
           />

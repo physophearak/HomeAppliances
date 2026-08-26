@@ -15,9 +15,23 @@ function emptyForm() {
   return { nameEn: '', nameKm: '', category: 'kitchen', priceUsd: '', stock: '', imageUrl: '', emoji: '📦', sku: '' }
 }
 
-export default function ProductsTab({ products, onAddProduct, loading, role }) {
+function productToForm(p) {
+  return {
+    nameEn: p.nameEn,
+    nameKm: p.nameKm,
+    category: p.category,
+    priceUsd: String(p.priceUsd),
+    stock: String(p.stock),
+    imageUrl: p.imageUrl || '',
+    emoji: p.emoji || '📦',
+    sku: p.sku || '',
+  }
+}
+
+export default function ProductsTab({ products, onAddProduct, onUpdateProduct, loading, role }) {
   const { lang, t } = useLanguage()
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState(emptyForm())
   const [saving, setSaving] = useState(false)
   const canAddProduct = can(role, 'addProduct')
@@ -35,12 +49,24 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
     handleField('imageUrl', dataUrl)
   }
 
+  const openAddForm = () => {
+    setForm(emptyForm())
+    setEditingId(null)
+    setShowForm(true)
+  }
+
+  const openEditForm = (p) => {
+    setForm(productToForm(p))
+    setEditingId(p.id)
+    setShowForm(true)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.nameEn || !form.priceUsd) return
     setSaving(true)
-    await onAddProduct({
-      id: `P${Date.now()}`,
+    const product = {
+      id: editingId || `P${Date.now()}`,
       nameEn: form.nameEn,
       nameKm: form.nameKm,
       category: form.category,
@@ -49,9 +75,15 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
       imageUrl: form.imageUrl,
       sku: form.sku,
       emoji: form.emoji,
-    })
+    }
+    if (editingId) {
+      await onUpdateProduct(product)
+    } else {
+      await onAddProduct(product)
+    }
     setSaving(false)
     setForm(emptyForm())
+    setEditingId(null)
     setShowForm(false)
   }
 
@@ -61,7 +93,7 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
 
       {canAddProduct ? (
         <button
-          onClick={() => setShowForm((s) => !s)}
+          onClick={() => (showForm ? setShowForm(false) : openAddForm())}
           className="w-full py-4 mb-4 rounded-2xl bg-gray-900 text-white text-xl font-extrabold active:scale-95 transition"
         >
           {showForm ? `✕ ${t('cancel')}` : `+ ${t('addNewItem')}`}
@@ -72,6 +104,9 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
 
       {canAddProduct && showForm && (
         <form onSubmit={handleSubmit} className="bg-white rounded-3xl border-4 border-gray-200 p-4 mb-5 flex flex-col gap-3">
+          <p className="text-lg font-extrabold text-gray-900">
+            {editingId ? t('editItem') : t('addNewItem')}
+          </p>
           <Field label={t('productName')}>
             <input
               required
@@ -190,7 +225,7 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
             disabled={saving}
             className="mt-2 py-4 rounded-2xl bg-emerald-600 text-white text-xl font-extrabold active:scale-95 transition disabled:opacity-60"
           >
-            {saving ? t('saving') : t('save')}
+            {saving ? t('saving') : editingId ? t('saveChanges') : t('save')}
           </button>
         </form>
       )}
@@ -212,26 +247,31 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
           {products.map((p) => {
             const name = lang === 'km' && p.nameKm ? p.nameKm : p.nameEn
             return (
-              <li
-                key={p.id}
-                className="flex items-center gap-3 bg-white rounded-2xl border-4 border-gray-200 p-3"
-              >
-                <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
-                  {p.imageUrl ? (
-                    <img src={p.imageUrl} alt={name} className="w-full h-full object-cover" />
-                  ) : (
-                    p.emoji || '📦'
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-lg font-bold text-gray-900 truncate">{name}</p>
-                  <p className="text-base font-semibold text-gray-500">
-                    {formatUsd(p.priceUsd)} · {t(`categories.${p.category}`)}
-                  </p>
-                </div>
-                <span className="text-base font-extrabold text-gray-400 shrink-0">
-                  {p.stock} {t('unitsShort')}
-                </span>
+              <li key={p.id}>
+                <button
+                  type="button"
+                  onClick={() => canAddProduct && openEditForm(p)}
+                  disabled={!canAddProduct}
+                  className="w-full flex items-center gap-3 bg-white rounded-2xl border-4 border-gray-200 p-3 text-left active:scale-[0.98] transition disabled:active:scale-100"
+                >
+                  <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                    {p.imageUrl ? (
+                      <img src={p.imageUrl} alt={name} className="w-full h-full object-cover" />
+                    ) : (
+                      p.emoji || '📦'
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-bold text-gray-900 truncate">{name}</p>
+                    <p className="text-base font-semibold text-gray-500">
+                      {formatUsd(p.priceUsd)} · {t(`categories.${p.category}`)}
+                    </p>
+                  </div>
+                  <span className="text-base font-extrabold text-gray-400 shrink-0">
+                    {p.stock} {t('unitsShort')}
+                  </span>
+                  {canAddProduct && <span className="text-gray-300 text-xl ml-1">›</span>}
+                </button>
               </li>
             )
           })}
