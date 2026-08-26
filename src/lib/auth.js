@@ -17,6 +17,10 @@ export function loginAsRole(role, pin) {
   return true
 }
 
+export function getPinLength(role) {
+  return PINS[role]?.length || 4
+}
+
 export function logout() {
   localStorage.removeItem(ROLE_KEY)
 }

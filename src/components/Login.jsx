@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
-import { loginAsRole } from '../lib/auth'
+import { loginAsRole, getPinLength } from '../lib/auth'
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫']
 
@@ -35,16 +35,15 @@ export default function Login({ onLogin, onClose }) {
       return
     }
     setPin((p) => {
-      const next = (p + key).slice(0, 6)
-      if (next.length >= 4) {
+      const pinLength = getPinLength(role)
+      const next = (p + key).slice(0, pinLength)
+      if (next.length === pinLength) {
         if (loginAsRole(role, next)) {
           onLogin(role)
           return ''
         }
-        if (next.length === 6) {
-          setError(true)
-          return ''
-        }
+        setError(true)
+        return ''
       }
       return next
     })
