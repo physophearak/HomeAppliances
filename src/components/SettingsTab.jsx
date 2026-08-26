@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
-import { isConnected, getGasUrl, setGasUrl, clearGasUrl, testConnection } from '../lib/api'
+import { getGasUrl, setGasUrl, clearGasUrl, testConnection } from '../lib/api'
 import { getExchangeRate } from '../lib/currency'
 import { can } from '../lib/auth'
 import ManageHeader from './ManageHeader'
@@ -54,8 +54,6 @@ export default function SettingsTab({ role, onLogout, onUpdateExchangeRate, onCo
       <ManageHeader title={t('settingsTitle')} subtitle={t('settingsSubtitle')} role={role} />
 
       <div className="flex flex-col gap-3 mb-6">
-        <Row label={t('connectionStatus')} value={isConnected() ? t('connected') : t('notConnected')} />
-
         {canEditRate ? (
           <form
             onSubmit={handleSaveRate}
