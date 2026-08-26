@@ -3,7 +3,7 @@
  *
  * Setup:
  * 1. Create a Google Sheet with two tabs named exactly "Products" and "Sales".
- * 2. Products tab header row (row 1): ID | NameEn | NameKm | Category | PriceUsd | Stock | ImageUrl | Sku
+ * 2. Products tab header row (row 1): ID | NameEn | NameKm | Category | PriceUsd | Stock | ImageUrl | Sku | Emoji
  * 3. Sales tab header row (row 1):    Timestamp | ItemsJson | Total
  * 4. Extensions > Apps Script, paste this file in as Code.gs.
  * 5. Deploy > New deployment > Web app.
@@ -43,6 +43,7 @@ function sheetToProducts(sheet) {
         stock: Number(row.Stock),
         imageUrl: row.ImageUrl,
         sku: row.Sku,
+        emoji: row.Emoji || '📦',
       };
     });
 }
@@ -123,6 +124,7 @@ function handleAddProduct(body) {
     Number(body.stock) || 0,
     body.imageUrl || '',
     body.sku || '',
+    body.emoji || '📦',
   ]);
   return jsonResponse({
     ok: true,
@@ -135,6 +137,7 @@ function handleAddProduct(body) {
       stock: Number(body.stock) || 0,
       imageUrl: body.imageUrl || '',
       sku: body.sku || '',
+      emoji: body.emoji || '📦',
     },
   });
 }
@@ -144,7 +147,7 @@ function handleUpdateProduct(body) {
   const rowIndex = findRowById(productsSheet, body.id);
   if (rowIndex === -1) return jsonResponse({ ok: false, error: 'Product not found' });
   productsSheet
-    .getRange(rowIndex, 1, 1, 8)
+    .getRange(rowIndex, 1, 1, 9)
     .setValues([
       [
         body.id,
@@ -155,6 +158,7 @@ function handleUpdateProduct(body) {
         Number(body.stock) || 0,
         body.imageUrl || '',
         body.sku || '',
+        body.emoji || '📦',
       ],
     ]);
   return jsonResponse({
@@ -168,6 +172,7 @@ function handleUpdateProduct(body) {
       stock: Number(body.stock) || 0,
       imageUrl: body.imageUrl || '',
       sku: body.sku || '',
+      emoji: body.emoji || '📦',
     },
   });
 }

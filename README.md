@@ -18,7 +18,7 @@ the whole flow before connecting a real Google Sheet.
 ## Connect it to a Google Sheet (your database)
 
 1. Create a new Google Sheet with two tabs, named exactly:
-   - **Products** — header row: `ID | NameEn | NameKm | Category | PriceUsd | Stock | ImageUrl | Sku`
+   - **Products** — header row: `ID | NameEn | NameKm | Category | PriceUsd | Stock | ImageUrl | Sku | Emoji`
    - **Sales** — header row: `Timestamp | ItemsJson | Total`
 2. Fill the **Products** tab with your catalog (or copy the demo data from
    `src/data/seedProducts.js`). `Category` should be one of: `kitchen`,
