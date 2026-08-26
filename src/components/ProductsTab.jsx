@@ -1,13 +1,18 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { formatUsd } from '../lib/currency'
 import { can } from '../lib/auth'
+import { fileToDataUrl } from '../lib/image'
 import ManageHeader from './ManageHeader'
 
 const CATEGORY_OPTIONS = ['kitchen', 'appliances', 'cleaning', 'cooling']
+const ICON_OPTIONS = [
+  '📦', '🍚', '🌀', '🫖', '🥤', '🍳', '🧹', '❄️',
+  '🍞', '🚰', '👕', '🔪', '🪣', '🔌', '🧯', '🛁',
+]
 
 function emptyForm() {
-  return { nameEn: '', nameKm: '', category: 'kitchen', priceUsd: '', stock: '', imageUrl: '', sku: '' }
+  return { nameEn: '', nameKm: '', category: 'kitchen', priceUsd: '', stock: '', imageUrl: '', emoji: '📦', sku: '' }
 }
 
 export default function ProductsTab({ products, onAddProduct, loading, role }) {
@@ -16,8 +21,19 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
   const [form, setForm] = useState(emptyForm())
   const [saving, setSaving] = useState(false)
   const canAddProduct = can(role, 'addProduct')
+  const fileInputRef = useRef(null)
 
   const handleField = (key, value) => setForm((f) => ({ ...f, [key]: value }))
+
+  const handleChooseIcon = (icon) => setForm((f) => ({ ...f, emoji: icon, imageUrl: '' }))
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const dataUrl = await fileToDataUrl(file)
+    handleField('imageUrl', dataUrl)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -32,7 +48,7 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
       stock: Number(form.stock) || 0,
       imageUrl: form.imageUrl,
       sku: form.sku,
-      emoji: '📦',
+      emoji: form.emoji,
     })
     setSaving(false)
     setForm(emptyForm())
@@ -106,12 +122,60 @@ export default function ProductsTab({ products, onAddProduct, loading, role }) {
               />
             </Field>
           </div>
-          <Field label={t('imageUrl')}>
-            <input
-              value={form.imageUrl}
-              onChange={(e) => handleField('imageUrl', e.target.value)}
-              className="input"
-            />
+          <Field label={t('productImage')}>
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                {form.imageUrl ? (
+                  <img src={form.imageUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  form.emoji
+                )}
+              </div>
+              <div className="flex flex-col items-start gap-2 flex-1">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full py-3 rounded-xl bg-gray-100 text-gray-800 text-base font-bold active:scale-95 transition"
+                >
+                  📷 {t('uploadPhoto')}
+                </button>
+                {form.imageUrl && (
+                  <button
+                    type="button"
+                    onClick={() => handleField('imageUrl', '')}
+                    className="text-sm font-bold text-red-600 underline"
+                  >
+                    {t('removePhoto')}
+                  </button>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
+          </Field>
+          <Field label={t('chooseIcon')}>
+            <div className="flex flex-wrap gap-2">
+              {ICON_OPTIONS.map((icon) => (
+                <button
+                  key={icon}
+                  type="button"
+                  onClick={() => handleChooseIcon(icon)}
+                  className={`w-11 h-11 rounded-xl text-2xl flex items-center justify-center border-4 transition ${
+                    !form.imageUrl && form.emoji === icon
+                      ? 'border-emerald-500 bg-emerald-50'
+                      : 'border-gray-100 bg-gray-50'
+                  }`}
+                >
+                  {icon}
+                </button>
+              ))}
+            </div>
           </Field>
           <Field label={t('sku')}>
             <input
