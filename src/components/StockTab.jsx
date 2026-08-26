@@ -1,13 +1,19 @@
 import { useLanguage } from '../i18n/LanguageContext'
 import { formatUsd } from '../lib/currency'
+import { can } from '../lib/auth'
 import ManageHeader from './ManageHeader'
 
 export default function StockTab({ products, onUpdateStock, loading, role }) {
   const { lang, t } = useLanguage()
+  const canAdjustStock = can(role, 'adjustStock')
 
   return (
     <div className="px-4 pt-4 pb-10">
       <ManageHeader title={t('stockTitle')} subtitle={t('stockSubtitle')} role={role} />
+
+      {!canAdjustStock && (
+        <p className="text-base font-semibold text-gray-400 mb-4">{t('stockOwnerOnly')}</p>
+      )}
 
       {loading ? (
         <ul className="flex flex-col gap-3">
@@ -45,14 +51,16 @@ export default function StockTab({ products, onUpdateStock, loading, role }) {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => onUpdateStock(p.id, Math.max(0, p.stock - 1))}
-                    className="w-11 h-11 rounded-full bg-gray-200 text-gray-800 text-2xl font-extrabold flex items-center justify-center active:scale-90 transition"
+                    disabled={!canAdjustStock}
+                    className="w-11 h-11 rounded-full bg-gray-200 text-gray-800 text-2xl font-extrabold flex items-center justify-center active:scale-90 transition disabled:opacity-40 disabled:active:scale-100"
                   >
                     −
                   </button>
                   <span className="w-10 text-center text-xl font-extrabold">{p.stock}</span>
                   <button
                     onClick={() => onUpdateStock(p.id, p.stock + 1)}
-                    className="w-11 h-11 rounded-full bg-emerald-600 text-white text-2xl font-extrabold flex items-center justify-center active:scale-90 transition"
+                    disabled={!canAdjustStock}
+                    className="w-11 h-11 rounded-full bg-emerald-600 text-white text-2xl font-extrabold flex items-center justify-center active:scale-90 transition disabled:opacity-40 disabled:active:scale-100"
                   >
                     +
                   </button>
