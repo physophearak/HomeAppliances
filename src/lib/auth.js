@@ -26,8 +26,8 @@ export function logout() {
 }
 
 export const PERMISSIONS = {
-  owner: { addProduct: true, adjustStock: true, editExchangeRate: true },
-  staff: { addProduct: false, adjustStock: false, editExchangeRate: false },
+  owner: { addProduct: true, adjustStock: true, editExchangeRate: true, manageConnection: true },
+  staff: { addProduct: false, adjustStock: false, editExchangeRate: false, manageConnection: false },
 }
 
 export function can(role, permission) {

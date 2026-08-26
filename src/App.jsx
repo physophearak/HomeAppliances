@@ -125,6 +125,17 @@ function AppInner() {
     setToast({ type: 'success', message: t('exchangeRateUpdated') })
   }
 
+  const handleConnectionChange = async () => {
+    setLoading(true)
+    const data = await fetchProducts()
+    setProducts(data)
+    setLoading(false)
+    setToast({
+      type: 'success',
+      message: isConnected() ? t('sheetConnected') : t('sheetDisconnected'),
+    })
+  }
+
   const handleLogout = () => {
     logoutRole()
     setRole(null)
@@ -137,7 +148,7 @@ function AppInner() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col">
-      <Header connected={isConnected} />
+      <Header connected={isConnected()} />
       <Toast toast={toast} />
 
       <div
@@ -188,7 +199,12 @@ function AppInner() {
         ) : tab === 'reports' ? (
           <ReportsTab role={role} />
         ) : (
-          <SettingsTab role={role} onLogout={handleLogout} onUpdateExchangeRate={handleUpdateExchangeRate} />
+          <SettingsTab
+            role={role}
+            onLogout={handleLogout}
+            onUpdateExchangeRate={handleUpdateExchangeRate}
+            onConnectionChange={handleConnectionChange}
+          />
         )}
       </div>
 

@@ -1,11 +1,47 @@
 import { seedProducts } from '../data/seedProducts'
 
-const ENDPOINT = import.meta.env.VITE_GAS_URL || ''
+const GAS_URL_KEY = 'jehour_gas_url'
 const LOCAL_PRODUCTS_KEY = 'jehour_products_cache'
 const LOCAL_PENDING_SALES_KEY = 'jehour_pending_sales'
 const LOCAL_SALES_LOG_KEY = 'jehour_sales_log'
 
-export const isConnected = Boolean(ENDPOINT)
+// Owner can connect/disconnect a Google Sheet from Settings, which overrides
+// this build-time default. A stored value (including an explicit empty
+// string from disconnecting) always wins over the .env default.
+function getEndpoint() {
+  const stored = localStorage.getItem(GAS_URL_KEY)
+  if (stored !== null) return stored
+  return import.meta.env.VITE_GAS_URL || ''
+}
+
+export function getGasUrl() {
+  return getEndpoint()
+}
+
+export function setGasUrl(url) {
+  localStorage.setItem(GAS_URL_KEY, url.trim())
+}
+
+export function clearGasUrl() {
+  setGasUrl('')
+}
+
+export function isConnected() {
+  return Boolean(getEndpoint())
+}
+
+// Checks that a URL is a working Apps Script deployment before we commit to
+// it, so a typo or unpublished script doesn't silently strand the app.
+export async function testConnection(url) {
+  try {
+    const res = await fetch(`${url.trim()}?action=products`)
+    if (!res.ok) return false
+    const data = await res.json()
+    return Array.isArray(data.products) || Array.isArray(data)
+  } catch {
+    return false
+  }
+}
 
 function readLocalProducts() {
   try {
@@ -55,7 +91,7 @@ function normalizeProduct(row) {
 // Apps Script web apps don't handle CORS preflight requests well, so we send
 // POST bodies as text/plain (a "simple request") and parse JSON server-side.
 async function postToScript(payload) {
-  const res = await fetch(ENDPOINT, {
+  const res = await fetch(getEndpoint(), {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload),
@@ -65,11 +101,12 @@ async function postToScript(payload) {
 }
 
 export async function fetchProducts() {
-  if (!ENDPOINT) {
+  const endpoint = getEndpoint()
+  if (!endpoint) {
     return readLocalProducts()
   }
   try {
-    const res = await fetch(`${ENDPOINT}?action=products`)
+    const res = await fetch(`${endpoint}?action=products`)
     if (!res.ok) throw new Error(`Request failed: ${res.status}`)
     const data = await res.json()
     const products = (data.products || data || []).map(normalizeProduct)
@@ -98,7 +135,7 @@ export async function recordSale({ items, total, timestamp }) {
   writeLocalProducts(updated)
   logSaleLocally(sale)
 
-  if (!ENDPOINT) {
+  if (!getEndpoint()) {
     return { ok: true, offline: true }
   }
   try {
@@ -118,7 +155,7 @@ export async function updateStock(productId, newStock) {
   const updated = products.map((p) => (p.id === productId ? { ...p, stock: newStock } : p))
   writeLocalProducts(updated)
 
-  if (!ENDPOINT) return { ok: true, offline: true }
+  if (!getEndpoint()) return { ok: true, offline: true }
   try {
     await postToScript({ action: 'updateStock', id: productId, stock: newStock })
     return { ok: true, offline: false }
@@ -133,7 +170,7 @@ export async function addProduct(product) {
   const newProduct = normalizeProduct(product)
   writeLocalProducts([...products, newProduct])
 
-  if (!ENDPOINT) return { ok: true, offline: true, product: newProduct }
+  if (!getEndpoint()) return { ok: true, offline: true, product: newProduct }
   try {
     const res = await postToScript({ action: 'addProduct', ...newProduct })
     return { ok: true, offline: false, product: normalizeProduct(res.product || newProduct) }
@@ -148,7 +185,7 @@ export async function updateProduct(product) {
   const updated = normalizeProduct(product)
   writeLocalProducts(products.map((p) => (p.id === updated.id ? updated : p)))
 
-  if (!ENDPOINT) return { ok: true, offline: true, product: updated }
+  if (!getEndpoint()) return { ok: true, offline: true, product: updated }
   try {
     const res = await postToScript({ action: 'updateProduct', ...updated })
     return { ok: true, offline: false, product: normalizeProduct(res.product || updated) }
