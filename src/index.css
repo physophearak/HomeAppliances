@@ -61,6 +61,12 @@ button {
   cursor: pointer;
 }
 
+/* Safari needs the -webkit- prefix for the frosted-glass header/nav bars;
+   Tailwind's generated backdrop-filter alone is silently ignored there. */
+.backdrop-blur {
+  -webkit-backdrop-filter: blur(8px);
+}
+
 button:active {
   transform: scale(0.97);
 }
