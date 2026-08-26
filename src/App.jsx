@@ -113,6 +113,8 @@ function AppInner() {
   const handleLogout = () => {
     logoutRole()
     setRole(null)
+    setCategory('all')
+    setSearch('')
   }
 
   const hasCartItems = cart.length > 0
