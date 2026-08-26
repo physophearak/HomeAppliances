@@ -141,6 +141,7 @@ function AppInner() {
     setRole(null)
     setCategory('all')
     setSearch('')
+    setTab('stock')
   }
 
   const hasCartItems = cart.length > 0
@@ -179,7 +180,6 @@ function AppInner() {
               setRole(loggedInRole)
               setTab('pos')
             }}
-            onClose={() => setTab('pos')}
           />
         ) : tab === 'stock' ? (
           <StockTab
