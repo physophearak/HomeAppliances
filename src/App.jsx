@@ -146,7 +146,13 @@ function AppInner() {
             setSearch={setSearch}
           />
         ) : !role ? (
-          <Login onLogin={setRole} onClose={() => setTab('pos')} />
+          <Login
+            onLogin={(loggedInRole) => {
+              setRole(loggedInRole)
+              setTab('pos')
+            }}
+            onClose={() => setTab('pos')}
+          />
         ) : tab === 'stock' ? (
           <StockTab
             products={products}
