@@ -3,10 +3,22 @@ import { useLanguage } from '../i18n/LanguageContext'
 import { fileToDataUrl } from '../lib/image'
 
 const CATEGORY_OPTIONS = ['kitchen', 'appliances', 'cleaning', 'cooling']
-const ICON_OPTIONS = [
-  '📦', '🍚', '🌀', '🫖', '🥤', '🍳', '🧹', '❄️',
-  '🍞', '🚰', '👕', '🔪', '🪣', '🔌', '🧯', '🛁',
-]
+
+const ICONS_BY_CATEGORY = {
+  kitchen: ['🍚', '🫖', '🥤', '🍳', '🍞', '🔪'],
+  appliances: ['🚰', '👕', '🔌', '🛁'],
+  cleaning: ['🧹', '🪣', '🧯'],
+  cooling: ['🌀', '❄️'],
+}
+const ALL_ICONS = Object.values(ICONS_BY_CATEGORY).flat()
+
+// Puts icons that match the chosen category first, so the best fits are
+// easiest to reach, while still keeping every icon reachable below.
+function orderedIcons(category) {
+  const matched = ICONS_BY_CATEGORY[category] || []
+  const rest = ALL_ICONS.filter((icon) => !matched.includes(icon))
+  return ['📦', ...matched, ...rest]
+}
 
 function emptyForm() {
   return { nameEn: '', nameKm: '', category: 'kitchen', priceUsd: '', stock: '', imageUrl: '', emoji: '📦', sku: '' }
@@ -174,7 +186,7 @@ export default function ProductFormModal({ product, onSave, onClose }) {
           </Field>
           <Field label={t('chooseIcon')}>
             <div className="flex flex-wrap gap-2">
-              {ICON_OPTIONS.map((icon) => (
+              {orderedIcons(form.category).map((icon) => (
                 <button
                   key={icon}
                   type="button"
