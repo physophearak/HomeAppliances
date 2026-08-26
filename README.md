@@ -30,12 +30,15 @@ the whole flow before connecting a real Google Sheet.
    - **Execute as:** Me
    - **Who has access:** Anyone
 6. Copy the deployment's web app URL (ends in `/exec`).
-7. Copy `.env.example` to `.env` and paste the URL into `VITE_GAS_URL`:
-   ```
-   VITE_GAS_URL=https://script.google.com/macros/s/XXXXXXXX/exec
-   ```
-8. Restart the dev server (`npm run dev`). The amber "offline mode" banner
-   should disappear.
+7. In the app, log in as **Owner** → **Setting** tab → paste the URL into
+   **Google Sheet URL** → **Connect**. It tests the URL before saving, and
+   the amber "offline mode" banner disappears once connected. This is stored
+   per-device (`localStorage`), so no rebuild or redeploy is needed.
+
+   Alternatively, to bake in a default URL for every device (e.g. before
+   deploying the built site), copy `.env.example` to `.env` and set
+   `VITE_GAS_URL=https://script.google.com/macros/s/XXXXXXXX/exec`, then
+   restart the dev server. Connecting from Settings always overrides this.
 
 If the app ever can't reach the sheet (no internet, quota, etc.), it keeps
 working from its local cache and queues the sale to retry — nothing is lost.
@@ -47,9 +50,12 @@ working from its local cache and queues the sale to retry — nothing is lost.
   add it to the bill. A bottom bar is always visible with the running total
   and a big green **Checkout** button; tapping it opens the cart drawer with
   large `+` / `−` buttons per line item, or checks out immediately.
-- **Stock tab** — shows every product with big `+` / `−` stock controls, and
-  a form to add a brand-new appliance (name in both languages, category,
-  price, starting quantity, optional image URL).
+- **Stock tab** — shows every product's quantity; tap one (Owner only) to
+  open a popup with `+` / `−` steppers and `+5` / `+10` / `+50` quick-add
+  buttons.
+- **Product tab** — add or edit appliances (name in both languages, category,
+  price, quantity, SKU, and a photo/camera upload or an icon picker) via a
+  popup form, Owner only.
 - **Language toggle** — top-right button switches every label and the
   product names shown throughout the app between English and Khmer instantly.
 
@@ -57,9 +63,9 @@ working from its local cache and queues the sale to retry — nothing is lost.
 
 ```
 src/
-  components/       UI components (ProductGrid, CartDrawer, AdminTab, ...)
+  components/       UI components (ProductGrid, CartDrawer, ProductsTab, ...)
   i18n/              Language context + English/Khmer translation strings
-  lib/               api.js (Google Apps Script client), currency.js
+  lib/               api.js (Google Apps Script client), currency.js, auth.js
   data/seedProducts.js   Demo catalog used offline / as a starting sheet import
 google-apps-script/
   Code.gs            Paste into Apps Script — the entire backend
@@ -70,7 +76,7 @@ google-apps-script/
 - **Exchange rate**: set `VITE_KHR_RATE` in `.env` (defaults to 4100 ៛ per $1).
 - **Categories**: edit the `categories` object in
   `src/i18n/translations.js` (both `en` and `km`) and the `CATEGORY_OPTIONS`
-  array in `src/components/AdminTab.jsx`.
+  array in `src/components/ProductFormModal.jsx`.
 - **Branding**: the app name/logo letter live in `src/components/Header.jsx`.
 
 ## Build for production

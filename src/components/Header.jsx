@@ -20,13 +20,26 @@ export default function Header({ connected }) {
           </div>
         </div>
 
-        <button
-          onClick={toggleLang}
-          className="shrink-0 px-3.5 py-2.5 rounded-full bg-gray-900 text-white font-bold text-base active:scale-95 transition"
-          aria-label="Toggle language"
-        >
-          {t('langToggle')}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
+              connected ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${connected ? 'bg-emerald-500' : 'bg-amber-500'}`}
+            />
+            {connected ? t('onlineShort') : t('offlineShort')}
+          </span>
+
+          <button
+            onClick={toggleLang}
+            className="shrink-0 px-3.5 py-2.5 rounded-full bg-gray-900 text-white font-bold text-base active:scale-95 transition"
+            aria-label="Toggle language"
+          >
+            {t('langToggle')}
+          </button>
+        </div>
       </div>
 
       {!connected && (
