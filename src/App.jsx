@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext'
 import { fetchProducts, recordSale, updateStock, addProduct, isConnected } from './lib/api'
 import { getStoredRole, logout as logoutRole } from './lib/auth'
+import { setExchangeRate } from './lib/currency'
 import Header from './components/Header'
 import ProductGrid from './components/ProductGrid'
 import CartBar from './components/CartBar'
@@ -110,6 +111,11 @@ function AppInner() {
     })
   }
 
+  const handleUpdateExchangeRate = (rate) => {
+    setExchangeRate(rate)
+    setToast({ type: 'success', message: t('exchangeRateUpdated') })
+  }
+
   const handleLogout = () => {
     logoutRole()
     setRole(null)
@@ -172,7 +178,7 @@ function AppInner() {
         ) : tab === 'reports' ? (
           <ReportsTab role={role} />
         ) : (
-          <SettingsTab role={role} onLogout={handleLogout} />
+          <SettingsTab role={role} onLogout={handleLogout} onUpdateExchangeRate={handleUpdateExchangeRate} />
         )}
       </div>
 
