@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { LanguageProvider, useLanguage } from './i18n/LanguageContext'
-import { fetchProducts, recordSale, updateStock, addProduct, updateProduct, isConnected } from './lib/api'
+import {
+  fetchProducts,
+  recordSale,
+  updateStock,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  isConnected,
+} from './lib/api'
 import { getStoredRole, logout as logoutRole } from './lib/auth'
 import { setExchangeRate } from './lib/currency'
 import Header from './components/Header'
@@ -120,6 +128,15 @@ function AppInner() {
     })
   }
 
+  const handleDeleteProduct = async (productId) => {
+    setProducts((prev) => prev.filter((p) => p.id !== productId))
+    const result = await deleteProduct(productId)
+    setToast({
+      type: result.ok ? 'success' : 'error',
+      message: result.ok ? t('itemDeleted') : t('saleError'),
+    })
+  }
+
   const handleUpdateExchangeRate = (rate) => {
     setExchangeRate(rate)
     setToast({ type: 'success', message: t('exchangeRateUpdated') })
@@ -193,6 +210,7 @@ function AppInner() {
             products={products}
             onAddProduct={handleAddProduct}
             onUpdateProduct={handleUpdateProduct}
+            onDeleteProduct={handleDeleteProduct}
             loading={loading}
             role={role}
           />

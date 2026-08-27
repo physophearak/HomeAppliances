@@ -4,12 +4,22 @@ import { formatUsd } from '../lib/currency'
 import { can } from '../lib/auth'
 import ManageHeader from './ManageHeader'
 import ProductFormModal from './ProductFormModal'
+import ConfirmModal from './ConfirmModal'
 
-export default function ProductsTab({ products, onAddProduct, onUpdateProduct, loading, role }) {
+export default function ProductsTab({
+  products,
+  onAddProduct,
+  onUpdateProduct,
+  onDeleteProduct,
+  loading,
+  role,
+}) {
   const { lang, t } = useLanguage()
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+  const [deletingProduct, setDeletingProduct] = useState(null)
   const canAddProduct = can(role, 'addProduct')
+  const canDeleteProduct = can(role, 'deleteProduct')
 
   const modalOpen = showAddModal || Boolean(editingProduct)
 
@@ -25,6 +35,12 @@ export default function ProductsTab({ products, onAddProduct, onUpdateProduct, l
       await onAddProduct(product)
     }
     closeModal()
+  }
+
+  const handleConfirmDelete = async () => {
+    const productId = deletingProduct.id
+    setDeletingProduct(null)
+    await onDeleteProduct(productId)
   }
 
   return (
@@ -88,6 +104,16 @@ export default function ProductsTab({ products, onAddProduct, onUpdateProduct, l
                     ✎ {t('edit')}
                   </button>
                 )}
+                {canDeleteProduct && (
+                  <button
+                    type="button"
+                    onClick={() => setDeletingProduct(p)}
+                    aria-label={t('delete')}
+                    className="shrink-0 w-9 h-9 rounded-xl bg-red-50 text-red-600 text-base font-extrabold flex items-center justify-center active:scale-95 transition"
+                  >
+                    🗑
+                  </button>
+                )}
               </li>
             )
           })}
@@ -96,6 +122,20 @@ export default function ProductsTab({ products, onAddProduct, onUpdateProduct, l
 
       {modalOpen && (
         <ProductFormModal product={editingProduct} onSave={handleSave} onClose={closeModal} />
+      )}
+
+      {deletingProduct && (
+        <ConfirmModal
+          title={t('deleteItemTitle')}
+          message={
+            (lang === 'km' && deletingProduct.nameKm ? deletingProduct.nameKm : deletingProduct.nameEn) +
+            ' — ' +
+            t('deleteItemMessage')
+          }
+          confirmLabel={t('delete')}
+          onConfirm={handleConfirmDelete}
+          onClose={() => setDeletingProduct(null)}
+        />
       )}
     </div>
   )

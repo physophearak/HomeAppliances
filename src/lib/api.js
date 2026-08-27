@@ -180,6 +180,20 @@ export async function addProduct(product) {
   }
 }
 
+export async function deleteProduct(productId) {
+  const products = readLocalProducts()
+  writeLocalProducts(products.filter((p) => p.id !== productId))
+
+  if (!getEndpoint()) return { ok: true, offline: true }
+  try {
+    await postToScript({ action: 'deleteProduct', id: productId })
+    return { ok: true, offline: false }
+  } catch (err) {
+    console.warn('Delete product failed to sync:', err)
+    return { ok: false, offline: true }
+  }
+}
+
 export async function updateProduct(product) {
   const products = readLocalProducts()
   const updated = normalizeProduct(product)

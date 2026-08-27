@@ -81,6 +81,9 @@ function doPost(e) {
   if (action === 'updateProduct') {
     return handleUpdateProduct(body);
   }
+  if (action === 'deleteProduct') {
+    return handleDeleteProduct(body);
+  }
   return jsonResponse({ ok: false, error: 'Unknown action' });
 }
 
@@ -140,6 +143,14 @@ function handleAddProduct(body) {
       emoji: body.emoji || '📦',
     },
   });
+}
+
+function handleDeleteProduct(body) {
+  const productsSheet = getSheet(PRODUCTS_SHEET);
+  const rowIndex = findRowById(productsSheet, body.id);
+  if (rowIndex === -1) return jsonResponse({ ok: false, error: 'Product not found' });
+  productsSheet.deleteRow(rowIndex);
+  return jsonResponse({ ok: true });
 }
 
 function handleUpdateProduct(body) {
