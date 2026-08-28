@@ -19,5 +19,5 @@ export function formatUsd(amount) {
 
 export function formatKhr(amount) {
   const khr = Math.round(Number(amount) * getExchangeRate())
-  return `${khr.toLocaleString('en-US')}៛`
+  return `៛${khr.toLocaleString('en-US')}`
 }

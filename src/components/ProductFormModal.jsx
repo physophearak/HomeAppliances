@@ -1,8 +1,7 @@
 import { useRef, useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { fileToDataUrl } from '../lib/image'
-
-const CATEGORY_OPTIONS = ['kitchen', 'appliances', 'cleaning', 'cooling']
+import { DEFAULT_CATEGORY_KEYS, addCustomCategory, categoryLabel, useCustomCategories } from '../lib/categories'
 
 const ICONS_BY_CATEGORY = {
   kitchen: ['🍚', '🫖', '🥤', '🍳', '🍞', '🔪'],
@@ -38,13 +37,28 @@ function productToForm(p) {
 }
 
 export default function ProductFormModal({ product, onSave, onClose }) {
-  const { t } = useLanguage()
+  const { lang, t } = useLanguage()
   const editingId = product?.id ?? null
   const [form, setForm] = useState(() => (product ? productToForm(product) : emptyForm()))
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef(null)
+  const customCategories = useCustomCategories()
+  const categoryOptions = [...DEFAULT_CATEGORY_KEYS, ...customCategories.map((c) => c.key)]
+
+  const [showAddCategory, setShowAddCategory] = useState(false)
+  const [newCategoryEn, setNewCategoryEn] = useState('')
+  const [newCategoryKm, setNewCategoryKm] = useState('')
 
   const handleField = (key, value) => setForm((f) => ({ ...f, [key]: value }))
+
+  const handleAddCategory = () => {
+    if (!newCategoryEn.trim()) return
+    const category = addCustomCategory({ nameEn: newCategoryEn, nameKm: newCategoryKm })
+    handleField('category', category.key)
+    setNewCategoryEn('')
+    setNewCategoryKm('')
+    setShowAddCategory(false)
+  }
 
   const handleChooseIcon = (icon) => setForm((f) => ({ ...f, emoji: icon, imageUrl: '' }))
 
@@ -113,17 +127,61 @@ export default function ProductFormModal({ product, onSave, onClose }) {
             />
           </Field>
           <Field label={t('category')}>
-            <select
-              value={form.category}
-              onChange={(e) => handleField('category', e.target.value)}
-              className="input"
-            >
-              {CATEGORY_OPTIONS.map((c) => (
-                <option key={c} value={c}>
-                  {t(`categories.${c}`)}
-                </option>
-              ))}
-            </select>
+            <div className="flex gap-2">
+              <select
+                value={form.category}
+                onChange={(e) => handleField('category', e.target.value)}
+                className="input flex-1"
+              >
+                {categoryOptions.map((c) => (
+                  <option key={c} value={c}>
+                    {categoryLabel(c, customCategories, lang, t)}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => setShowAddCategory((v) => !v)}
+                aria-label={t('addCategory')}
+                className="shrink-0 w-14 rounded-xl bg-gray-100 text-gray-800 text-2xl font-extrabold active:scale-95 transition"
+              >
+                +
+              </button>
+            </div>
+            {showAddCategory && (
+              <div className="mt-2 p-3 rounded-xl bg-gray-50 border-4 border-gray-100 flex flex-col gap-2">
+                <input
+                  autoFocus
+                  value={newCategoryEn}
+                  onChange={(e) => setNewCategoryEn(e.target.value)}
+                  placeholder={t('categoryNameEn')}
+                  className="input"
+                />
+                <input
+                  value={newCategoryKm}
+                  onChange={(e) => setNewCategoryKm(e.target.value)}
+                  placeholder={t('categoryNameKm')}
+                  className="input"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddCategory(false)}
+                    className="flex-1 py-3 rounded-xl bg-gray-200 text-gray-800 text-base font-extrabold active:scale-95 transition"
+                  >
+                    {t('cancel')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleAddCategory}
+                    disabled={!newCategoryEn.trim()}
+                    className="flex-1 py-3 rounded-xl bg-emerald-600 text-white text-base font-extrabold active:scale-95 transition disabled:opacity-50"
+                  >
+                    {t('addCategory')}
+                  </button>
+                </div>
+              </div>
+            )}
           </Field>
           <div className="flex gap-3">
             <Field label={t('priceUsd')} className="flex-1">

@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { formatUsd } from '../lib/currency'
 import { can } from '../lib/auth'
+import { categoryLabel, useCustomCategories } from '../lib/categories'
 import ManageHeader from './ManageHeader'
 import ProductFormModal from './ProductFormModal'
 import ConfirmModal from './ConfirmModal'
+import SwipeableRow from './SwipeableRow'
 
 export default function ProductsTab({
   products,
@@ -18,8 +20,11 @@ export default function ProductsTab({
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
   const [deletingProduct, setDeletingProduct] = useState(null)
+  const [openRowId, setOpenRowId] = useState(null)
+  const customCategories = useCustomCategories()
   const canAddProduct = can(role, 'addProduct')
   const canDeleteProduct = can(role, 'deleteProduct')
+  const canSwipe = canAddProduct || canDeleteProduct
 
   const modalOpen = showAddModal || Boolean(editingProduct)
 
@@ -71,53 +76,65 @@ export default function ProductsTab({
           ))}
         </ul>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {products.map((p) => {
-            const name = lang === 'km' && p.nameKm ? p.nameKm : p.nameEn
-            return (
-              <li
-                key={p.id}
-                className="flex items-center gap-3 bg-white rounded-2xl border-4 border-gray-200 p-3"
-              >
-                <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
-                  {p.imageUrl ? (
-                    <img src={p.imageUrl} alt={name} className="w-full h-full object-cover" />
+        <>
+          {canSwipe && (
+            <p className="text-sm font-semibold text-gray-400 mb-2 text-center">
+              {t('swipeHint')}
+            </p>
+          )}
+          <ul className="flex flex-col gap-3">
+            {products.map((p) => {
+              const name = lang === 'km' && p.nameKm ? p.nameKm : p.nameEn
+              const row = (
+                <div className="flex items-center gap-3 bg-white border-4 border-gray-200 p-3">
+                  <div className="w-16 h-16 rounded-xl bg-emerald-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                    {p.imageUrl ? (
+                      <img src={p.imageUrl} alt={name} className="w-full h-full object-cover" />
+                    ) : (
+                      p.emoji || '📦'
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-bold text-gray-900 truncate">{name}</p>
+                    <p className="text-base font-semibold text-gray-500">
+                      {formatUsd(p.priceUsd)} · {categoryLabel(p.category, customCategories, lang, t)}
+                    </p>
+                    <p className="text-sm font-semibold text-gray-400">
+                      {p.stock} {t('unitsShort')}
+                    </p>
+                  </div>
+                </div>
+              )
+              return (
+                <li key={p.id}>
+                  {canSwipe ? (
+                    <SwipeableRow
+                      id={p.id}
+                      open={openRowId === p.id}
+                      onInteract={setOpenRowId}
+                      onOpen={setOpenRowId}
+                      onClose={() => setOpenRowId((cur) => (cur === p.id ? null : cur))}
+                      leftAction={
+                        canAddProduct
+                          ? { icon: '✎', label: t('edit'), onClick: () => setEditingProduct(p) }
+                          : null
+                      }
+                      rightAction={
+                        canDeleteProduct
+                          ? { icon: '🗑', label: t('delete'), onClick: () => setDeletingProduct(p) }
+                          : null
+                      }
+                    >
+                      {row}
+                    </SwipeableRow>
                   ) : (
-                    p.emoji || '📦'
+                    row
                   )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-lg font-bold text-gray-900 truncate">{name}</p>
-                  <p className="text-base font-semibold text-gray-500">
-                    {formatUsd(p.priceUsd)} · {t(`categories.${p.category}`)}
-                  </p>
-                  <p className="text-sm font-semibold text-gray-400">
-                    {p.stock} {t('unitsShort')}
-                  </p>
-                </div>
-                {canAddProduct && (
-                  <button
-                    type="button"
-                    onClick={() => setEditingProduct(p)}
-                    className="shrink-0 px-4 py-2 rounded-xl bg-gray-100 text-gray-800 text-sm font-extrabold active:scale-95 transition"
-                  >
-                    ✎ {t('edit')}
-                  </button>
-                )}
-                {canDeleteProduct && (
-                  <button
-                    type="button"
-                    onClick={() => setDeletingProduct(p)}
-                    aria-label={t('delete')}
-                    className="shrink-0 w-9 h-9 rounded-xl bg-red-50 text-red-600 text-base font-extrabold flex items-center justify-center active:scale-95 transition"
-                  >
-                    🗑
-                  </button>
-                )}
-              </li>
-            )
-          })}
-        </ul>
+                </li>
+              )
+            })}
+          </ul>
+        </>
       )}
 
       {modalOpen && (

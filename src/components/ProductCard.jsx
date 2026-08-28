@@ -32,12 +32,12 @@ export default function ProductCard({ product, qtyInCart, onAdd }) {
         <span className="text-lg font-bold text-gray-900 leading-snug line-clamp-2 min-h-[2.6em]">
           {name}
         </span>
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-2xl font-extrabold text-emerald-700">
-            {formatUsd(product.priceUsd)}
-          </span>
-          <span className="text-base font-semibold text-gray-500">
+        <div className="flex flex-col">
+          <span className="text-xl font-extrabold text-gray-500">
             {formatKhr(product.priceUsd)}
+          </span>
+          <span className="text-xl font-extrabold text-emerald-700">
+            {formatUsd(product.priceUsd)}
           </span>
         </div>
         <span
