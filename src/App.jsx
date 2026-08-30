@@ -28,6 +28,7 @@ const PROTECTED_TABS = ['stock', 'products', 'reports', 'settings']
 function AppInner() {
   const { t } = useLanguage()
   const [tab, setTab] = useState(() => (getStoredRole() ? 'pos' : 'stock'))
+  const [productsResetKey, setProductsResetKey] = useState(0)
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState([])
@@ -207,6 +208,7 @@ function AppInner() {
           />
         ) : tab === 'products' ? (
           <ProductsTab
+            key={productsResetKey}
             products={products}
             onAddProduct={handleAddProduct}
             onUpdateProduct={handleUpdateProduct}
@@ -250,7 +252,16 @@ function AppInner() {
         </>
       )}
 
-      {!showingLogin && <BottomNav tab={tab} setTab={setTab} role={role} />}
+      {!showingLogin && (
+        <BottomNav
+          tab={tab}
+          setTab={setTab}
+          role={role}
+          onReselect={(id) => {
+            if (id === 'products') setProductsResetKey((k) => k + 1)
+          }}
+        />
+      )}
     </div>
   )
 }

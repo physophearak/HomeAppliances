@@ -97,7 +97,6 @@ export default function ProductsTab({
     <div className="px-4 pt-4 pb-10">
       <ManageHeader
         title={category === null ? t('productsTitle') : categoryLabel(category, customCategories, lang, t)}
-        subtitle={category === null ? t('selectCategoryHint') : t('productsSubtitle')}
         role={role}
       />
 
@@ -131,9 +130,6 @@ export default function ProductsTab({
             >
               + {t('addCategory')}
             </button>
-          )}
-          {canAddProduct && categories.length > 1 && (
-            <p className="text-sm font-semibold text-gray-400 mb-2 text-center">{t('swipeHint')}</p>
           )}
           <ul className="flex flex-col gap-3">
             {categories.map((c) => {
@@ -214,11 +210,6 @@ export default function ProductsTab({
         </ul>
       ) : (
         <>
-          {canSwipe && filteredProducts.length > 0 && (
-            <p className="text-sm font-semibold text-gray-400 mb-2 text-center">
-              {t('swipeHint')}
-            </p>
-          )}
           {filteredProducts.length === 0 ? (
             <div className="py-20 text-center text-xl font-bold text-gray-400">{t('noProducts')}</div>
           ) : (

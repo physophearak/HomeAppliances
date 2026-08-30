@@ -2,7 +2,7 @@ import { useLanguage } from '../i18n/LanguageContext'
 
 const STAFF_TABS = ['pos', 'stock', 'settings']
 
-export default function BottomNav({ tab, setTab, role }) {
+export default function BottomNav({ tab, setTab, role, onReselect }) {
   const { t } = useLanguage()
 
   const allTabs = [
@@ -25,7 +25,7 @@ export default function BottomNav({ tab, setTab, role }) {
         return (
           <button
             key={item.id}
-            onClick={() => setTab(item.id)}
+            onClick={() => (active ? onReselect?.(item.id) : setTab(item.id))}
             className="flex-1 flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 relative min-w-0"
           >
             <span

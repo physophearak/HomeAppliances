@@ -7,7 +7,7 @@ export default function ManageHeader({ title, subtitle, role }) {
     <div className="flex items-start justify-between gap-3 mb-4">
       <div>
         <h2 className="text-3xl font-extrabold text-gray-900">{title}</h2>
-        <p className="text-lg text-gray-500">{subtitle}</p>
+        {subtitle && <p className="text-lg text-gray-500">{subtitle}</p>}
       </div>
       <span
         className={`px-3 py-1 rounded-full text-sm font-extrabold whitespace-nowrap shrink-0 mt-1 ${
