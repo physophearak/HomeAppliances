@@ -29,6 +29,7 @@ function AppInner() {
   const { t } = useLanguage()
   const [tab, setTab] = useState(() => (getStoredRole() ? 'pos' : 'stock'))
   const [productsResetKey, setProductsResetKey] = useState(0)
+  const [stockResetKey, setStockResetKey] = useState(0)
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState([])
@@ -201,6 +202,7 @@ function AppInner() {
           />
         ) : tab === 'stock' ? (
           <StockTab
+            key={stockResetKey}
             products={products}
             onUpdateStock={handleUpdateStock}
             loading={loading}
@@ -259,6 +261,7 @@ function AppInner() {
           role={role}
           onReselect={(id) => {
             if (id === 'products') setProductsResetKey((k) => k + 1)
+            if (id === 'stock') setStockResetKey((k) => k + 1)
           }}
         />
       )}
