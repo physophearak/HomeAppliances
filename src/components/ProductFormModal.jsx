@@ -271,7 +271,6 @@ export default function ProductFormModal({ product, onSave, onClose }) {
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={handleFileChange}
                 className="hidden"
               />
