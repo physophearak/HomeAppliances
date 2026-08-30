@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { formatUsd } from '../lib/currency'
 import { can } from '../lib/auth'
-import { categoryLabel, useCustomCategories } from '../lib/categories'
+import { DEFAULT_CATEGORY_KEYS, categoryLabel, useCustomCategories } from '../lib/categories'
 import ManageHeader from './ManageHeader'
 import ProductFormModal from './ProductFormModal'
 import ConfirmModal from './ConfirmModal'
@@ -21,10 +21,14 @@ export default function ProductsTab({
   const [editingProduct, setEditingProduct] = useState(null)
   const [deletingProduct, setDeletingProduct] = useState(null)
   const [openRowId, setOpenRowId] = useState(null)
+  const [category, setCategory] = useState('all')
   const customCategories = useCustomCategories()
   const canAddProduct = can(role, 'addProduct')
   const canDeleteProduct = can(role, 'deleteProduct')
   const canSwipe = canAddProduct || canDeleteProduct
+
+  const categories = ['all', ...DEFAULT_CATEGORY_KEYS, ...customCategories.map((c) => c.key)]
+  const filteredProducts = products.filter((p) => category === 'all' || p.category === category)
 
   const modalOpen = showAddModal || Boolean(editingProduct)
 
@@ -63,6 +67,24 @@ export default function ProductsTab({
         <p className="text-base font-semibold text-gray-400 mb-4">{t('productsOwnerOnly')}</p>
       )}
 
+      {!loading && (
+        <div className="flex gap-2 overflow-x-auto pb-3 -mx-4 px-4">
+          {categories.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCategory(c)}
+              className={`shrink-0 px-5 py-3 rounded-full text-lg font-bold border-4 transition ${
+                category === c
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-white text-gray-700 border-gray-200'
+              }`}
+            >
+              {categoryLabel(c, customCategories, lang, t)}
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading ? (
         <ul className="flex flex-col gap-3">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -77,13 +99,16 @@ export default function ProductsTab({
         </ul>
       ) : (
         <>
-          {canSwipe && (
+          {canSwipe && filteredProducts.length > 0 && (
             <p className="text-sm font-semibold text-gray-400 mb-2 text-center">
               {t('swipeHint')}
             </p>
           )}
+          {filteredProducts.length === 0 ? (
+            <div className="py-20 text-center text-xl font-bold text-gray-400">{t('noProducts')}</div>
+          ) : (
           <ul className="flex flex-col gap-3">
-            {products.map((p) => {
+            {filteredProducts.map((p) => {
               const name = lang === 'km' && p.nameKm ? p.nameKm : p.nameEn
               const row = (
                 <div className="flex items-center gap-3 bg-white border-4 border-gray-200 p-3">
@@ -134,6 +159,7 @@ export default function ProductsTab({
               )
             })}
           </ul>
+          )}
         </>
       )}
 
