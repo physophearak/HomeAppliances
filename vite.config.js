@@ -6,4 +6,9 @@ import { defineConfig } from 'vite'
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/HomeAppliances/' : '/',
   plugins: [react(), tailwindcss()],
+  test: {
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.js',
+    globals: true,
+  },
 }))

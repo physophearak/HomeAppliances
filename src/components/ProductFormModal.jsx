@@ -1,7 +1,13 @@
 import { useRef, useState } from 'react'
 import { useLanguage } from '../i18n/LanguageContext'
 import { fileToDataUrl } from '../lib/image'
-import { DEFAULT_CATEGORY_KEYS, addCustomCategory, categoryLabel, useCustomCategories } from '../lib/categories'
+import {
+  DEFAULT_CATEGORY_KEYS,
+  addCustomCategory,
+  categoryLabel,
+  renameCustomCategory,
+  useCustomCategories,
+} from '../lib/categories'
 
 const ICONS_BY_CATEGORY = {
   kitchen: ['🍚', '🫖', '🥤', '🍳', '🍞', '🔪'],
@@ -44,20 +50,34 @@ export default function ProductFormModal({ product, onSave, onClose }) {
   const fileInputRef = useRef(null)
   const customCategories = useCustomCategories()
   const categoryOptions = [...DEFAULT_CATEGORY_KEYS, ...customCategories.map((c) => c.key)]
+  const selectedCustomCategory = customCategories.find((c) => c.key === form.category)
 
-  const [showAddCategory, setShowAddCategory] = useState(false)
-  const [newCategoryEn, setNewCategoryEn] = useState('')
-  const [newCategoryKm, setNewCategoryKm] = useState('')
+  // categoryEditor is null when closed, or { mode: 'add' | 'rename', nameEn, nameKm }
+  const [categoryEditor, setCategoryEditor] = useState(null)
 
   const handleField = (key, value) => setForm((f) => ({ ...f, [key]: value }))
 
-  const handleAddCategory = () => {
-    if (!newCategoryEn.trim()) return
-    const category = addCustomCategory({ nameEn: newCategoryEn, nameKm: newCategoryKm })
-    handleField('category', category.key)
-    setNewCategoryEn('')
-    setNewCategoryKm('')
-    setShowAddCategory(false)
+  const openAddCategory = () =>
+    setCategoryEditor((cur) => (cur?.mode === 'add' ? null : { mode: 'add', nameEn: '', nameKm: '' }))
+
+  const openRenameCategory = () => {
+    if (!selectedCustomCategory) return
+    setCategoryEditor((cur) =>
+      cur?.mode === 'rename'
+        ? null
+        : { mode: 'rename', nameEn: selectedCustomCategory.nameEn, nameKm: selectedCustomCategory.nameKm }
+    )
+  }
+
+  const handleSaveCategory = () => {
+    if (!categoryEditor?.nameEn.trim()) return
+    if (categoryEditor.mode === 'add') {
+      const category = addCustomCategory({ nameEn: categoryEditor.nameEn, nameKm: categoryEditor.nameKm })
+      handleField('category', category.key)
+    } else {
+      renameCustomCategory(form.category, { nameEn: categoryEditor.nameEn, nameKm: categoryEditor.nameKm })
+    }
+    setCategoryEditor(null)
   }
 
   const handleChooseIcon = (icon) => setForm((f) => ({ ...f, emoji: icon, imageUrl: '' }))
@@ -139,45 +159,55 @@ export default function ProductFormModal({ product, onSave, onClose }) {
                   </option>
                 ))}
               </select>
+              {selectedCustomCategory && (
+                <button
+                  type="button"
+                  onClick={openRenameCategory}
+                  aria-label={t('renameCategory')}
+                  className="shrink-0 w-14 rounded-xl bg-gray-100 text-gray-800 text-2xl font-extrabold active:scale-95 transition"
+                >
+                  ✎
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setShowAddCategory((v) => !v)}
+                onClick={openAddCategory}
                 aria-label={t('addCategory')}
                 className="shrink-0 w-14 rounded-xl bg-gray-100 text-gray-800 text-2xl font-extrabold active:scale-95 transition"
               >
                 +
               </button>
             </div>
-            {showAddCategory && (
+            {categoryEditor && (
               <div className="mt-2 p-3 rounded-xl bg-gray-50 border-4 border-gray-100 flex flex-col gap-2">
                 <input
                   autoFocus
-                  value={newCategoryEn}
-                  onChange={(e) => setNewCategoryEn(e.target.value)}
+                  value={categoryEditor.nameEn}
+                  onChange={(e) => setCategoryEditor((c) => ({ ...c, nameEn: e.target.value }))}
                   placeholder={t('categoryNameEn')}
                   className="input"
                 />
                 <input
-                  value={newCategoryKm}
-                  onChange={(e) => setNewCategoryKm(e.target.value)}
+                  value={categoryEditor.nameKm}
+                  onChange={(e) => setCategoryEditor((c) => ({ ...c, nameKm: e.target.value }))}
                   placeholder={t('categoryNameKm')}
                   className="input"
                 />
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => setShowAddCategory(false)}
+                    onClick={() => setCategoryEditor(null)}
                     className="flex-1 py-3 rounded-xl bg-gray-200 text-gray-800 text-base font-extrabold active:scale-95 transition"
                   >
                     {t('cancel')}
                   </button>
                   <button
                     type="button"
-                    onClick={handleAddCategory}
-                    disabled={!newCategoryEn.trim()}
+                    onClick={handleSaveCategory}
+                    disabled={!categoryEditor.nameEn.trim()}
                     className="flex-1 py-3 rounded-xl bg-emerald-600 text-white text-base font-extrabold active:scale-95 transition disabled:opacity-50"
                   >
-                    {t('addCategory')}
+                    {categoryEditor.mode === 'add' ? t('addCategory') : t('saveChanges')}
                   </button>
                 </div>
               </div>

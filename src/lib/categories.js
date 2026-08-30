@@ -42,6 +42,17 @@ export function addCustomCategory({ nameEn, nameKm }) {
   return category
 }
 
+// Renames a shop-defined category in place (its key/slug is unaffected, so
+// existing products keep pointing at the same category).
+export function renameCustomCategory(key, { nameEn, nameKm }) {
+  const existing = getCustomCategories()
+  const updated = existing.map((c) =>
+    c.key === key ? { ...c, nameEn: nameEn.trim(), nameKm: nameKm.trim() } : c
+  )
+  localStorage.setItem(CATEGORIES_KEY, JSON.stringify(updated))
+  window.dispatchEvent(new Event(CHANGE_EVENT))
+}
+
 // Live-updates in every component using it as soon as a category is added
 // anywhere in the app (e.g. from the Add New Appliance form).
 export function useCustomCategories() {
