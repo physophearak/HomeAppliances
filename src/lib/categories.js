@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 
 const CATEGORIES_KEY = 'jehour_custom_categories'
+const OVERRIDES_KEY = 'jehour_category_overrides'
+const HIDDEN_KEY = 'jehour_hidden_categories'
 const CHANGE_EVENT = 'jehour:categories-changed'
 
 // The four built-in categories already have translated labels in
@@ -53,6 +55,50 @@ export function renameCustomCategory(key, { nameEn, nameKm }) {
   window.dispatchEvent(new Event(CHANGE_EVENT))
 }
 
+// Removes a shop-defined category. Products already tagged with it keep
+// their stored key, so re-add a category with the same name to recover them.
+export function deleteCustomCategory(key) {
+  const existing = getCustomCategories()
+  const updated = existing.filter((c) => c.key !== key)
+  localStorage.setItem(CATEGORIES_KEY, JSON.stringify(updated))
+  window.dispatchEvent(new Event(CHANGE_EVENT))
+}
+
+export function getCategoryOverrides() {
+  try {
+    return JSON.parse(localStorage.getItem(OVERRIDES_KEY) || '{}')
+  } catch {
+    return {}
+  }
+}
+
+// Renames a built-in category by storing a local override — its translation
+// key stays untouched, so existing products keep pointing at the same category.
+export function setCategoryOverride(key, { nameEn, nameKm }) {
+  const overrides = getCategoryOverrides()
+  overrides[key] = { nameEn: nameEn.trim(), nameKm: nameKm.trim() }
+  localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides))
+  window.dispatchEvent(new Event(CHANGE_EVENT))
+}
+
+export function getHiddenDefaultCategories() {
+  try {
+    return JSON.parse(localStorage.getItem(HIDDEN_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
+// Hides a built-in category from pickers and lists without touching
+// products already tagged with it.
+export function hideDefaultCategory(key) {
+  const hidden = getHiddenDefaultCategories()
+  if (!hidden.includes(key)) {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hidden, key]))
+    window.dispatchEvent(new Event(CHANGE_EVENT))
+  }
+}
+
 // Live-updates in every component using it as soon as a category is added
 // anywhere in the app (e.g. from the Add New Appliance form).
 export function useCustomCategories() {
@@ -65,10 +111,13 @@ export function useCustomCategories() {
   return categories
 }
 
-// Resolves a category key to a display label: translated for the four
-// built-ins, or the shop's own English/Khmer name for a custom one.
+// Resolves a category key to a display label: the shop's own English/Khmer
+// name for a custom category, a stored override for a renamed built-in one,
+// or its translation otherwise.
 export function categoryLabel(key, customCategories, lang, t) {
   const custom = customCategories.find((c) => c.key === key)
   if (custom) return (lang === 'km' && custom.nameKm ? custom.nameKm : custom.nameEn) || key
+  const override = getCategoryOverrides()[key]
+  if (override) return (lang === 'km' && override.nameKm ? override.nameKm : override.nameEn) || key
   return t(`categories.${key}`)
 }

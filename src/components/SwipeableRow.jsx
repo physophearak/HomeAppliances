@@ -8,8 +8,20 @@ const TAP_SLOP = 6 // px of movement below which a gesture counts as a tap, not 
 // reveal an edit action, instead of showing always-visible buttons. Only one
 // row is ever open at a time: starting a gesture on any row closes whichever
 // other row was open (`onInteract`), and tapping an already-open row closes
-// it back up.
-export default function SwipeableRow({ id, open, onInteract, onOpen, onClose, leftAction, rightAction, children }) {
+// it back up. A plain tap on a closed row calls `onTap` directly rather than
+// relying on a native click bubbling through the pointer-captured wrapper,
+// which some WebKit versions swallow.
+export default function SwipeableRow({
+  id,
+  open,
+  onInteract,
+  onOpen,
+  onClose,
+  onTap,
+  leftAction,
+  rightAction,
+  children,
+}) {
   const [x, setX] = useState(0)
   const [dragging, setDragging] = useState(false)
   const startX = useRef(0)
@@ -51,6 +63,11 @@ export default function SwipeableRow({ id, open, onInteract, onOpen, onClose, le
     if (!moved.current && x !== 0) {
       setX(0)
       onClose(id)
+      return
+    }
+
+    if (!moved.current && x === 0) {
+      onTap?.()
       return
     }
 

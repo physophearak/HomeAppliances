@@ -1,12 +1,22 @@
 import { useLanguage } from '../i18n/LanguageContext'
-import { DEFAULT_CATEGORY_KEYS, categoryLabel, useCustomCategories } from '../lib/categories'
+import {
+  DEFAULT_CATEGORY_KEYS,
+  categoryLabel,
+  getHiddenDefaultCategories,
+  useCustomCategories,
+} from '../lib/categories'
 import ProductCard from './ProductCard'
 
 export default function ProductGrid({ products, cart, onAdd, loading, category, setCategory, search, setSearch }) {
   const { lang, t } = useLanguage()
   const customCategories = useCustomCategories()
 
-  const categories = ['all', ...DEFAULT_CATEGORY_KEYS, ...customCategories.map((c) => c.key)]
+  const hiddenDefaults = getHiddenDefaultCategories()
+  const categories = [
+    'all',
+    ...DEFAULT_CATEGORY_KEYS.filter((k) => !hiddenDefaults.includes(k)),
+    ...customCategories.map((c) => c.key),
+  ]
 
   const filtered = products.filter((p) => {
     const matchesCategory = category === 'all' || p.category === category

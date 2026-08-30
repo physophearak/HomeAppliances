@@ -1,5 +1,15 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { addCustomCategory, categoryLabel, getCustomCategories, renameCustomCategory } from './categories'
+import {
+  addCustomCategory,
+  categoryLabel,
+  deleteCustomCategory,
+  getCategoryOverrides,
+  getCustomCategories,
+  getHiddenDefaultCategories,
+  hideDefaultCategory,
+  renameCustomCategory,
+  setCategoryOverride,
+} from './categories'
 
 beforeEach(() => {
   localStorage.clear()
@@ -34,11 +44,47 @@ describe('renameCustomCategory', () => {
   })
 })
 
+describe('deleteCustomCategory', () => {
+  it('removes only the targeted category', () => {
+    const a = addCustomCategory({ nameEn: 'Gaming', nameKm: '' })
+    const b = addCustomCategory({ nameEn: 'Toys', nameKm: '' })
+    deleteCustomCategory(a.key)
+    expect(getCustomCategories()).toEqual([b])
+  })
+
+  it('is a no-op when the key does not exist', () => {
+    const a = addCustomCategory({ nameEn: 'Gaming', nameKm: '' })
+    deleteCustomCategory('missing-key')
+    expect(getCustomCategories()).toEqual([a])
+  })
+})
+
+describe('setCategoryOverride', () => {
+  it('stores a rename for a built-in category', () => {
+    setCategoryOverride('kitchen', { nameEn: 'Kitchen Stuff', nameKm: '' })
+    expect(getCategoryOverrides()).toEqual({ kitchen: { nameEn: 'Kitchen Stuff', nameKm: '' } })
+  })
+})
+
+describe('hideDefaultCategory', () => {
+  it('adds the key to the hidden list without duplicating it', () => {
+    hideDefaultCategory('cleaning')
+    hideDefaultCategory('cleaning')
+    expect(getHiddenDefaultCategories()).toEqual(['cleaning'])
+  })
+})
+
 describe('categoryLabel', () => {
   const t = (key) => `translated:${key}`
 
   it('resolves built-in categories through the translator', () => {
     expect(categoryLabel('kitchen', [], 'en', t)).toBe('translated:categories.kitchen')
+  })
+
+  it('resolves an overridden built-in category to its stored name', () => {
+    setCategoryOverride('kitchen', { nameEn: 'Kitchen Stuff', nameKm: 'របស់ផ្ទះបាយ' })
+    expect(categoryLabel('kitchen', [], 'en', t)).toBe('Kitchen Stuff')
+    expect(categoryLabel('kitchen', [], 'km', t)).toBe('របស់ផ្ទះបាយ')
   })
 
   it('resolves a custom category to its English name in English mode', () => {

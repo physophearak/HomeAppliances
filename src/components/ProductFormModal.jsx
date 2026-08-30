@@ -5,6 +5,7 @@ import {
   DEFAULT_CATEGORY_KEYS,
   addCustomCategory,
   categoryLabel,
+  getHiddenDefaultCategories,
   renameCustomCategory,
   useCustomCategories,
 } from '../lib/categories'
@@ -49,7 +50,11 @@ export default function ProductFormModal({ product, onSave, onClose }) {
   const [saving, setSaving] = useState(false)
   const fileInputRef = useRef(null)
   const customCategories = useCustomCategories()
-  const categoryOptions = [...DEFAULT_CATEGORY_KEYS, ...customCategories.map((c) => c.key)]
+  const hiddenDefaults = getHiddenDefaultCategories()
+  const categoryOptions = [
+    ...DEFAULT_CATEGORY_KEYS.filter((k) => !hiddenDefaults.includes(k) || k === form.category),
+    ...customCategories.map((c) => c.key),
+  ]
   const selectedCustomCategory = customCategories.find((c) => c.key === form.category)
 
   // categoryEditor is null when closed, or { mode: 'add' | 'rename', nameEn, nameKm }
