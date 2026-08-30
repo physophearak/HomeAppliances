@@ -48,7 +48,8 @@ export default function ProductFormModal({ product, onSave, onClose }) {
   const editingId = product?.id ?? null
   const [form, setForm] = useState(() => (product ? productToForm(product) : emptyForm()))
   const [saving, setSaving] = useState(false)
-  const fileInputRef = useRef(null)
+  const cameraInputRef = useRef(null)
+  const galleryInputRef = useRef(null)
   const customCategories = useCustomCategories()
   const hiddenDefaults = getHiddenDefaultCategories()
   const categoryOptions = [
@@ -250,13 +251,22 @@ export default function ProductFormModal({ product, onSave, onClose }) {
                 )}
               </div>
               <div className="flex flex-col items-start gap-2 flex-1">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-3 rounded-xl bg-gray-100 text-gray-800 text-base font-bold active:scale-95 transition"
-                >
-                  📷 {t('uploadPhoto')}
-                </button>
+                <div className="w-full flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-800 text-base font-bold active:scale-95 transition"
+                  >
+                    📷 {t('takePhoto')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => galleryInputRef.current?.click()}
+                    className="flex-1 py-3 rounded-xl bg-gray-100 text-gray-800 text-base font-bold active:scale-95 transition"
+                  >
+                    🖼️ {t('uploadPhoto')}
+                  </button>
+                </div>
                 {form.imageUrl && (
                   <button
                     type="button"
@@ -268,7 +278,15 @@ export default function ProductFormModal({ product, onSave, onClose }) {
                 )}
               </div>
               <input
-                ref={fileInputRef}
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <input
+                ref={galleryInputRef}
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
